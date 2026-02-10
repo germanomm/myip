@@ -1,3 +1,13 @@
 name = "myip-gmm-tec-br"
 main = "src/index.js"
 compatibility_date = "2024-10-01"
+
+[env.production]
+name = "myip-gmm-tec-br"
+# Aqui vão configs específicas de produção, se houver
+
+[env.dev]
+name = "myip-gmm-tec-br-dev"
+# Aqui vão configs específicas do ambiente dev
+
+
