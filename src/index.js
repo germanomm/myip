@@ -44,7 +44,7 @@ export default {
       if (isIPv6) {
         return new Response(ip + "\n", { status: 200, headers });
       }
-      return new Response("Error: IPv6 address not detected.\n", { status: 400, headers });
+      return new Response("IPv6 address not detected.\n", { status: 400, headers });
     }
 
     // Default response for myip / myip4
