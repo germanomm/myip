@@ -1,6 +1,6 @@
 /**
- * Updated myip Worker (v4/v6)
- * Fixed 403 issues and optimized CORS for info.gmm.tec.br
+ * Worker for myip.gmm.tec.br, myip4, and myip6
+ * Optimized for myinfo.gmm.tec.br dashboard
  */
 
 export default {
@@ -8,49 +8,46 @@ export default {
     const url = new URL(request.url);
     const hostname = url.hostname;
     
-    // Define the only allowed origin for your dashboard
-    const allowedOrigin = "https://info.gmm.tec.br";
+    // The Dashboard URL that is allowed to read this data
+    const allowedOrigin = "https://myinfo.gmm.tec.br";
     const origin = request.headers.get("Origin");
 
-    // Extract the client IP
+    // Extract the client IP from Cloudflare
     const ip = request.headers.get("CF-Connecting-IP") || "";
     const isIPv6 = ip.includes(":");
     
-    // Prepare base headers
+    // Standard response headers
     const headers = { 
       "Content-Type": "text/plain; charset=utf-8",
       "Cache-Control": "no-store",
       "X-Content-Type-Options": "nosniff"
     };
 
-    // CORS logic: Only attach headers if the Origin matches or if it's a preflight request
+    // CORS Logic: Only allow the specific dashboard to bypass browser security
     if (origin === allowedOrigin) {
       headers["Access-Control-Allow-Origin"] = allowedOrigin;
       headers["Access-Control-Allow-Methods"] = "GET, OPTIONS";
       headers["Access-Control-Allow-Headers"] = "Content-Type";
-      headers["Access-Control-Max-Age"] = "86400"; // Cache preflight for 24h
-    } else if (origin) {
-      // If there's an origin but it's NOT yours, we don't send CORS headers (Browser will block)
-    } else {
-      // Direct browser access (no Origin header) - Allow it to avoid 403
+      headers["Access-Control-Max-Age"] = "86400"; 
+    } else if (!origin) {
+      // Allow direct browser access (curl, typing URL in bar) without blocking
       headers["Access-Control-Allow-Origin"] = "*";
     }
 
-    // Handle Browser Preflight (OPTIONS)
+    // Handle Browser Preflight (OPTIONS) - Critical to avoid 403/ERR_CORS
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers });
     }
 
-    // Specific logic for IPv6 enforcement
+    // IPv6 Enforcement for myip6 hostname
     if (hostname.startsWith("myip6")) {
       if (isIPv6) {
         return new Response(ip + "\n", { status: 200, headers });
       }
-      // Return 404 (Not Found) or 400 (Bad Request) instead of 403
-      return new Response("Error: IPv6 address not detected via this hostname.\n", { status: 400, headers });
+      return new Response("Error: IPv6 address not detected.\n", { status: 400, headers });
     }
 
-    // Default response for myip4 or other hostnames
+    // Default response for myip / myip4
     return new Response(ip + "\n", { status: 200, headers });
   }
 };
