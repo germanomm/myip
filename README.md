@@ -1,2 +1,2 @@
 # myip
-MyIP App to put on cloud hosting
+MyIP App to put on Cloudflare Workers hosting
